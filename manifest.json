@@ -1,0 +1,23 @@
+{
+  "name": "日本旅行神隊友 (全家福版)",
+  "short_name": "日本神隊友",
+  "description": "明仔、芝女、大B、豬妹、落馬洲與P仔的專屬日文翻譯神器",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#14171a",
+  "theme_color": "#ff5252",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' rx='28' fill='%23ff5252'/><text y='42' x='12' font-size='28'>🧑👩🤖</text><text y='85' x='12' font-size='28'>🐱🐱🐱</text><text y='110' x='24' font-size='16' font-weight='bold' fill='white'>🇯🇵 JAPAN</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
