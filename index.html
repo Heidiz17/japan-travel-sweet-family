@@ -5,18 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>日本旅行神隊友</title>
 
-  <!-- PWA 設定與引入 Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-title" content="日本神隊友">
   <meta name="application-name" content="日本神隊友">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#ff5252">
-
-  <!-- 全家福圖標備用 -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' rx='28' fill='%23ff5252'/><text y='42' x='12' font-size='28'>🧑👩🤖</text><text y='85' x='12' font-size='28'>🐱🐱🐱</text><text y='110' x='24' font-size='16' font-weight='bold' fill='white'>🇯🇵 JAPAN</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' rx='28' fill='%23ff5252'/><text y='42' x='12' font-size='28'>🧑👩🤖</text><text y='85' x='12' font-size='28'>🐱🐱🐱</text><text y='110' x='24' font-size='16' font-weight='bold' fill='white'>🇯🇵 JAPAN</text></svg>">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -116,7 +110,7 @@
 <body>
 
   <div class="app-header">
-    <span style="font-size: 26px;">🧑👩🤖🐱🐱🐱</span>
+    <span style="font-size: 24px;">🧑👩🤖🐱🐱🐱</span>
     <span class="app-title">日本神隊友</span>
   </div>
 
@@ -149,15 +143,11 @@
   </div>
 
   <script>
-    // 註冊 PWA Service Worker 確保手機支援完整 App 安裝
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-          console.log('SW registration failed: ', err);
-        });
-      });
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
+    // 請確保呢度係你個 Worker 網址
     const WORKER_URL = "https://wandering-haze-33cdbb-translator.stream-hub-th.workers.dev";
 
     const statusDiv = document.getElementById('status');
@@ -188,9 +178,11 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        return await res.json();
+        const data = await res.json();
+        return data;
       } catch (e) {
-        statusDiv.innerText = "連線失敗，請檢查網絡";
+        statusDiv.innerText = "連線失敗: " + e.message;
+        displayBox.innerHTML = '<div style="color: #ff5252; font-weight: bold;">連線出錯，請檢查網絡或 Worker！</div>';
         return null;
       }
     }
@@ -204,8 +196,16 @@
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
         statusDiv.innerText = "⏳ 翻譯緊日文...";
+        displayBox.innerHTML = '<div class="text-original">師傅講：「' + spoken + '」</div><div style="color: #ffeb3b; margin-top: 10px;">⏳ 正在呼叫 AI 翻譯...</div>';
 
         const result = await callWorker({ text: spoken, mode: "canto_to_ja" });
+
+        if (result && result.error) {
+          statusDiv.innerText = "出錯: " + result.error;
+          displayBox.innerHTML += '<div style="color: #ff5252; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
+          return;
+        }
+
         if (result && result.ja) {
           displayBox.innerHTML = 
             '<div class="text-original">師傅講：「' + spoken + '」</div>' +
@@ -213,9 +213,14 @@
             '<div class="text-sub">🗣️ ' + (result.romaji || '') + '</div>';
           statusDiv.innerText = "🔊 正在朗讀日文...";
           speak(result.ja, 'ja-JP');
+        } else {
+          statusDiv.innerText = "未收到有效翻譯結果";
         }
       };
-      recognizer.onerror = () => { statusDiv.innerText = "聽唔清，請再試！"; };
+
+      recognizer.onerror = (e) => { 
+        statusDiv.innerText = "語音識別未收到，請再試！"; 
+      };
     }
 
     function handleJapanese() {
@@ -227,16 +232,27 @@
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
         statusDiv.innerText = "⏳ 翻譯緊廣東話...";
+        displayBox.innerHTML = '<div class="text-original">相手：「' + spoken + '」</div><div style="color: #ffeb3b; margin-top: 10px;">⏳ 正在呼叫 AI 翻譯...</div>';
 
         const result = await callWorker({ text: spoken, mode: "ja_to_canto" });
+
+        if (result && result.error) {
+          statusDiv.innerText = "出錯: " + result.error;
+          displayBox.innerHTML += '<div style="color: #ff5252; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
+          return;
+        }
+
         if (result && result.canto) {
           displayBox.innerHTML = 
             '<div class="text-original">日本語：「' + spoken + '」</div>' +
             '<div class="text-main" style="color: #00e676;">廣東話：' + result.canto + '</div>';
           statusDiv.innerText = "🔊 正在朗讀廣東話...";
           speak(result.canto, 'zh-HK');
+        } else {
+          statusDiv.innerText = "未收到有效翻譯結果";
         }
       };
+
       recognizer.onerror = () => { statusDiv.innerText = "聞き取れませんでした"; };
     }
 
@@ -254,7 +270,7 @@
         if (result && result.canto) {
           displayBox.innerHTML = 
             '<img src="' + base64Data + '" class="preview-img">' +
-            '<div class="text-main" style="font-size: 20px; text-align: left;">' + result.canto.replace(/\\n/g, '<br>') + '</div>';
+            '<div class="text-main" style="font-size: 20px; text-align: left;">' + result.canto.replace(/\n/g, '<br>') + '</div>';
           statusDiv.innerText = "✅ 翻譯完成！";
         } else {
           statusDiv.innerText = "未能讀取文字，請再試！";
