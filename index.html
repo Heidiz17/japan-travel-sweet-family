@@ -10,19 +10,19 @@
   <meta name="application-name" content="日本神隊友">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#ff5252">
+  <meta name="theme-color" content="#ffffff">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang HK", sans-serif;
-      background: #14171a;
-      color: #ffffff;
+      background: #f8fafc;
+      color: #1e293b;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 14px;
-      gap: 10px;
+      padding: 16px;
+      gap: 12px;
       user-select: none;
     }
 
@@ -31,106 +31,93 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 4px 0;
+      padding: 6px 0;
     }
     .app-title {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 900;
-      color: #ff5252;
+      color: #e11d48;
       letter-spacing: 1px;
     }
 
     #status {
       text-align: center;
       font-size: 15px;
-      color: #b0bec5;
+      color: #64748b;
       font-weight: bold;
-      min-height: 22px;
+      min-height: 24px;
     }
 
     #display-box {
       flex: 1;
-      background: #21262d;
-      border: 2px solid #374151;
-      border-radius: 20px;
-      padding: 14px;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      gap: 8px;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
     }
-    .text-original { font-size: 16px; color: #9e9e9e; }
-    .text-main { font-size: 26px; font-weight: bold; color: #ff5252; line-height: 1.3; }
-    .text-sub { font-size: 19px; color: #ffd54f; line-height: 1.3; }
-    .preview-img { max-width: 90%; max-height: 140px; border-radius: 12px; margin-bottom: 6px; }
+    .text-original { font-size: 17px; color: #64748b; }
+    .text-main { font-size: 28px; font-weight: bold; color: #dc2626; line-height: 1.35; }
+    .text-sub { font-size: 20px; color: #d97706; line-height: 1.35; }
 
     .btn-container {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 16px;
+      padding-bottom: 8px;
     }
     .action-btn {
       width: 100%;
+      height: 110px;
       border: none;
-      border-radius: 18px;
+      border-radius: 22px;
       color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
       cursor: pointer;
     }
     .action-btn:active { transform: scale(0.97); }
 
-    .btn-camera {
-      height: 60px;
-      background: linear-gradient(135deg, #e040fb, #7b1fa2);
-      font-size: 20px;
-      font-weight: 800;
-    }
     .btn-master {
-      height: 90px;
-      background: linear-gradient(135deg, #2e7d32, #1b5e20);
-      font-size: 22px;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      font-size: 24px;
       font-weight: 900;
     }
     .btn-worker {
-      height: 90px;
-      background: linear-gradient(135deg, #c2185b, #880e4f);
-      font-size: 22px;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      font-size: 24px;
       font-weight: 900;
     }
-    .btn-subtext { font-size: 13px; font-weight: normal; margin-top: 3px; opacity: 0.85; }
+    .btn-subtext { font-size: 14px; font-weight: normal; margin-top: 5px; opacity: 0.9; }
   </style>
 </head>
 <body>
 
   <div class="app-header">
-    <span style="font-size: 22px;">🧑👩🤖🐱🐱🐱</span>
+    <span style="font-size: 24px;">🧑👩🤖🐱🐱🐱</span>
     <span class="app-title">日本神隊友</span>
   </div>
 
-  <div id="status">準備就緒，點掣開始</div>
+  <div id="status">準備就緒，點掣開始對話</div>
 
   <div id="display-box">
-    <div style="font-size: 44px;">⛩️</div>
-    <div style="font-size: 19px; font-weight: bold;">明仔芝女日本旅行神器</div>
-    <div style="font-size: 14px; color: #e040fb; font-weight: bold;">📷 影相翻譯：菜單 / 路牌 / 招牌</div>
-    <div style="font-size: 14px; color: #4caf50; font-weight: bold;">🟢 我講廣東話 ➔ 自動讀出日文</div>
-    <div style="font-size: 14px; color: #ff4081; font-weight: bold;">🔴 日本人講日語 ➔ 自動讀出廣東話</div>
+    <div style="font-size: 52px;">⛩️</div>
+    <div style="font-size: 22px; font-weight: bold; color: #0f172a;">明仔芝女日本旅行神器</div>
+    <div style="font-size: 15px; color: #16a34a; margin-top: 4px; font-weight: 600;">🟢 師傅講廣東話 ➔ 自動讀出日文</div>
+    <div style="font-size: 15px; color: #e11d48; margin-top: 4px; font-weight: 600;">🔴 日本人講日語 ➔ 自動讀出廣東話</div>
   </div>
 
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(event)">
-
   <div class="btn-container">
-    <button class="action-btn btn-camera" onclick="document.getElementById('cameraInput').click()">
-      📷 影相 / 菜單即譯 (Photo Translate)
-    </button>
-
     <button class="action-btn btn-master" onclick="handleMaster()">
       🟢 師傅講嘢 (我講廣東話)
       <span class="btn-subtext">講廣東話 ➔ 自動翻譯並讀出日文</span>
@@ -147,7 +134,6 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    // 已自動填入你全新的專屬 Worker 網址
     const WORKER_URL = "https://tight-snowflake-4d1fjapan-translator.stream-hub-th.workers.dev";
 
     const statusDiv = document.getElementById('status');
@@ -178,15 +164,14 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        return data;
+        return await res.json();
       } catch (e) {
         statusDiv.innerText = "連線失敗: " + e.message;
-        displayBox.innerHTML = '<div style="color: #ff5252; font-weight: bold;">連線出錯，請檢查網絡或 Worker！</div>';
         return null;
       }
     }
 
+    // 1. 廣東話 ➔ 日文
     function handleMaster() {
       if (!recognizer) return alert("請使用 Chrome 開啟語音功能！");
       recognizer.lang = 'zh-HK';
@@ -196,15 +181,9 @@
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
         statusDiv.innerText = "⏳ 翻譯緊日文...";
-        displayBox.innerHTML = '<div class="text-original">師傅講：「' + spoken + '」</div><div style="color: #ffeb3b; margin-top: 10px;">⏳ 正在呼叫 AI 翻譯...</div>';
+        displayBox.innerHTML = '<div class="text-original">師傅講：「' + spoken + '」</div><div style="color: #ca8a04; margin-top: 10px; font-weight: bold;">⏳ 正在呼叫 AI 翻譯...</div>';
 
         const result = await callWorker({ text: spoken, mode: "canto_to_ja" });
-
-        if (result && result.error) {
-          statusDiv.innerText = "出錯: " + result.error;
-          displayBox.innerHTML += '<div style="color: #ff5252; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
-          return;
-        }
 
         if (result && result.ja) {
           displayBox.innerHTML = 
@@ -214,15 +193,14 @@
           statusDiv.innerText = "🔊 正在朗讀日文...";
           speak(result.ja, 'ja-JP');
         } else {
-          statusDiv.innerText = "未收到有效翻譯結果";
+          statusDiv.innerText = "出錯: " + (result?.error || "未收到翻譯");
         }
       };
 
-      recognizer.onerror = () => { 
-        statusDiv.innerText = "語音識別未收到，請再試！"; 
-      };
+      recognizer.onerror = () => { statusDiv.innerText = "語音識別未收到，請再試！"; };
     }
 
+    // 2. 日本人講日語 ➔ 廣東話
     function handleJapanese() {
       if (!recognizer) return alert("請使用 Chrome 開啟語音功能！");
       recognizer.lang = 'ja-JP';
@@ -232,51 +210,22 @@
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
         statusDiv.innerText = "⏳ 翻譯緊廣東話...";
-        displayBox.innerHTML = '<div class="text-original">相手：「' + spoken + '」</div><div style="color: #ffeb3b; margin-top: 10px;">⏳ 正在呼叫 AI 翻譯...</div>';
+        displayBox.innerHTML = '<div class="text-original">相手：「' + spoken + '」</div><div style="color: #ca8a04; margin-top: 10px; font-weight: bold;">⏳ 正在呼叫 AI 翻譯...</div>';
 
         const result = await callWorker({ text: spoken, mode: "ja_to_canto" });
-
-        if (result && result.error) {
-          statusDiv.innerText = "出錯: " + result.error;
-          displayBox.innerHTML += '<div style="color: #ff5252; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
-          return;
-        }
 
         if (result && result.canto) {
           displayBox.innerHTML = 
             '<div class="text-original">日本語：「' + spoken + '」</div>' +
-            '<div class="text-main" style="color: #00e676;">廣東話：' + result.canto + '</div>';
+            '<div class="text-main" style="color: #16a34a;">廣東話：' + result.canto + '</div>';
           statusDiv.innerText = "🔊 正在朗讀廣東話...";
           speak(result.canto, 'zh-HK');
         } else {
-          statusDiv.innerText = "未收到有效翻譯結果";
+          statusDiv.innerText = "出錯: " + (result?.error || "未收到翻譯");
         }
       };
 
       recognizer.onerror = () => { statusDiv.innerText = "聞き取れませんでした"; };
-    }
-
-    function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      statusDiv.innerText = "📸 正在分析相片文字...";
-      reader.onload = async function(evt) {
-        const base64Data = evt.target.result;
-        displayBox.innerHTML = '<img src="' + base64Data + '" class="preview-img"><div style="color: #ffeb3b;">⏳ AI 正在翻譯日文...</div>';
-        
-        const result = await callWorker({ image: base64Data, mode: "ocr_ja" });
-        if (result && result.canto) {
-          displayBox.innerHTML = 
-            '<img src="' + base64Data + '" class="preview-img">' +
-            '<div class="text-main" style="font-size: 19px; text-align: left;">' + result.canto.replace(/\n/g, '<br>') + '</div>';
-          statusDiv.innerText = "✅ 翻譯完成！";
-        } else {
-          statusDiv.innerText = "未能讀取文字，請再試！";
-        }
-      };
-      reader.readAsDataURL(file);
     }
   </script>
 </body>
