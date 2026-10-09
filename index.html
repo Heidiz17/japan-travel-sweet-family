@@ -10,6 +10,7 @@
   <meta name="application-name" content="日本神隊友">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#ffffff">
 
   <style>
@@ -24,6 +25,7 @@
       padding: 16px;
       gap: 12px;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     .app-header {
@@ -67,6 +69,21 @@
     .text-main { font-size: 28px; font-weight: bold; color: #dc2626; line-height: 1.35; }
     .text-sub { font-size: 20px; color: #d97706; line-height: 1.35; }
 
+    .replay-btn {
+      margin-top: 10px;
+      background: #334155;
+      border: 1px solid #475569;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .replay-btn:active { background: #475569; }
+
     .btn-container {
       display: flex;
       flex-direction: column;
@@ -85,6 +102,7 @@
       justify-content: center;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
       cursor: pointer;
+      touch-action: manipulation;
     }
     .action-btn:active { transform: scale(0.97); }
 
@@ -104,7 +122,7 @@
 <body>
 
   <div class="app-header">
-    <span style="font-size: 24px;">🧑👩🤖🐱🐱🐱</span>
+    <span style="font-size: 24px;">⛩️🐱🇯🇵</span>
     <span class="app-title">日本神隊友</span>
   </div>
 
@@ -118,12 +136,12 @@
   </div>
 
   <div class="btn-container">
-    <button class="action-btn btn-master" onclick="handleMaster()">
+    <button class="action-btn btn-master" id="btn-master" onclick="handleMaster()">
       🟢 師傅講嘢 (我講廣東話)
       <span class="btn-subtext">講廣東話 ➔ 自動翻譯並讀出日文</span>
     </button>
 
-    <button class="action-btn btn-worker" onclick="handleJapanese()">
+    <button class="action-btn btn-worker" id="btn-worker" onclick="handleJapanese()">
       🔴 日本人講嘢 (相手が話す)
       <span class="btn-subtext">日本語 ➔ 自動翻譯並讀出廣東話</span>
     </button>
@@ -148,13 +166,90 @@
       recognizer.interimResults = false;
     }
 
+    // 1. 預先載入系統 Voice 清單（防止 iOS 搵唔到語音包而靜音）
+    let availableVoices = [];
+    function loadVoices() {
+      if ('speechSynthesis' in window) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+    }
+    loadVoices();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // 2. 解鎖 iOS 語音通道（純 TTS 觸發，不鎖死 Session）
+    function unlockIOSAudio() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const silent = new SpeechSynthesisUtterance(' ');
+        silent.volume = 0.01;
+        silent.rate = 10;
+        window.speechSynthesis.speak(silent);
+      }
+    }
+
+    // 3. 專為 iOS 設計的發音核心：嚴格鎖定廣東話 / 日語
     function speak(text, lang) {
       if (!('speechSynthesis' in window)) return;
+
       window.speechSynthesis.cancel();
+
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = lang;
       utter.rate = 0.95;
-      window.speechSynthesis.speak(utter);
+      utter.volume = 1.0;
+
+      if (availableVoices.length === 0) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+
+      let matchedVoice = null;
+
+      // 如果係廣東話，優先搵香港粵語語音包，杜絕普通話 (zh-CN)
+      if (lang === 'zh-HK') {
+        matchedVoice = availableVoices.find(v => 
+          v.lang.toLowerCase() === 'zh-hk' || 
+          v.lang.toLowerCase() === 'yue-hant-hk' ||
+          v.name.includes('Hong Kong') ||
+          v.name.includes('Sin-Ji') ||
+          v.name.includes('Cantonese')
+        );
+      } else if (lang === 'ja-JP') {
+        matchedVoice = availableVoices.find(v => 
+          v.lang.toLowerCase() === 'ja-jp' || 
+          v.lang.toLowerCase().startsWith('ja') ||
+          v.name.includes('Japanese') ||
+          v.name.includes('Kyoko') ||
+          v.name.includes('Otoya')
+        );
+      }
+
+      // 次選：一般前綴配對
+      if (!matchedVoice) {
+        matchedVoice = availableVoices.find(v => 
+          v.lang.toLowerCase() === lang.toLowerCase() || 
+          v.lang.replace('_', '-').toLowerCase().startsWith(lang.split('-')[0].toLowerCase())
+        );
+      }
+
+      if (matchedVoice) {
+        utter.voice = matchedVoice;
+      }
+
+      utter.onstart = () => {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      };
+
+      setTimeout(() => {
+        window.speechSynthesis.speak(utter);
+      }, 50);
     }
 
     async function callWorker(payload) {
@@ -167,16 +262,31 @@
         return await res.json();
       } catch (e) {
         statusDiv.innerText = "連線失敗: " + e.message;
+        displayBox.innerHTML = '<div style="color: #ef4444; font-weight: bold;">連線出錯，請檢查網絡或 Worker！</div>';
         return null;
       }
     }
 
     // 1. 廣東話 ➔ 日文
     function handleMaster() {
-      if (!recognizer) return alert("請使用 Chrome 開啟語音功能！");
+      unlockIOSAudio();
+
+      if (!recognizer) {
+        statusDiv.innerText = "⚠️ 此瀏覽器不支援語音識別";
+        alert("此模式尚未支援語音辨識，請使用 Safari / Chrome 並確保授權麥克風！");
+        return;
+      }
+
+      // 明確寫死香港廣東話辨識
       recognizer.lang = 'zh-HK';
       statusDiv.innerText = "🎧 師傅請講廣東話...";
-      recognizer.start();
+
+      try {
+        recognizer.start();
+      } catch (err) {
+        recognizer.stop();
+        setTimeout(() => recognizer.start(), 150);
+      }
 
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
@@ -185,27 +295,50 @@
 
         const result = await callWorker({ text: spoken, mode: "canto_to_ja" });
 
+        if (result && result.error) {
+          statusDiv.innerText = "出錯: " + result.error;
+          displayBox.innerHTML += '<div style="color: #ef4444; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
+          return;
+        }
+
         if (result && result.ja) {
+          const safeJa = encodeURIComponent(result.ja);
           displayBox.innerHTML = 
             '<div class="text-original">師傅講：「' + spoken + '」</div>' +
             '<div class="text-main">🇯🇵 ' + result.ja + '</div>' +
-            '<div class="text-sub">🗣️ ' + (result.romaji || '') + '</div>';
+            '<div class="text-sub">🗣️ ' + (result.romaji || '') + '</div>' +
+            '<button class="replay-btn" onclick="speak(decodeURIComponent(\'' + safeJa + '\'), \'ja-JP\')">🔊 重播日文</button>';
           statusDiv.innerText = "🔊 正在朗讀日文...";
           speak(result.ja, 'ja-JP');
         } else {
-          statusDiv.innerText = "出錯: " + (result?.error || "未收到翻譯");
+          statusDiv.innerText = "未收到有效翻譯結果";
         }
       };
 
-      recognizer.onerror = () => { statusDiv.innerText = "語音識別未收到，請再試！"; };
+      recognizer.onerror = () => { 
+        statusDiv.innerText = "語音識別未收到，請再試！"; 
+      };
     }
 
     // 2. 日本人講日語 ➔ 廣東話
     function handleJapanese() {
-      if (!recognizer) return alert("請使用 Chrome 開啟語音功能！");
+      unlockIOSAudio();
+
+      if (!recognizer) {
+        statusDiv.innerText = "⚠️ 音声認識がサポートされていません";
+        alert("音声認識がサポートされていません。");
+        return;
+      }
+
       recognizer.lang = 'ja-JP';
       statusDiv.innerText = "🎧 日本語でお話しください...";
-      recognizer.start();
+
+      try {
+        recognizer.start();
+      } catch (err) {
+        recognizer.stop();
+        setTimeout(() => recognizer.start(), 150);
+      }
 
       recognizer.onresult = async (event) => {
         const spoken = event.results[0][0].transcript;
@@ -214,18 +347,28 @@
 
         const result = await callWorker({ text: spoken, mode: "ja_to_canto" });
 
+        if (result && result.error) {
+          statusDiv.innerText = "出錯: " + result.error;
+          displayBox.innerHTML += '<div style="color: #ef4444; margin-top: 8px;">後台錯誤: ' + result.error + '</div>';
+          return;
+        }
+
         if (result && result.canto) {
+          const safeCanto = encodeURIComponent(result.canto);
           displayBox.innerHTML = 
             '<div class="text-original">日本語：「' + spoken + '」</div>' +
-            '<div class="text-main" style="color: #16a34a;">廣東話：' + result.canto + '</div>';
+            '<div class="text-main" style="color: #16a34a;">廣東話：' + result.canto + '</div>' +
+            '<button class="replay-btn" onclick="speak(decodeURIComponent(\'' + safeCanto + '\'), \'zh-HK\')">🔊 重播廣東話</button>';
           statusDiv.innerText = "🔊 正在朗讀廣東話...";
           speak(result.canto, 'zh-HK');
         } else {
-          statusDiv.innerText = "出錯: " + (result?.error || "未收到翻譯");
+          statusDiv.innerText = "未收到有效翻譯結果";
         }
       };
 
-      recognizer.onerror = () => { statusDiv.innerText = "聞き取れませんでした"; };
+      recognizer.onerror = () => { 
+        statusDiv.innerText = "聞き取れませんでした，請再試！"; 
+      };
     }
   </script>
 </body>
